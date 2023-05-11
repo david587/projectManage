@@ -1,20 +1,57 @@
 import React from 'react'
 import { useState } from "react"
+import Select from 'react-select'
+import { useCollection } from '../../hooks/useCollection'
 
 //styles
 import "./Create.css"
+import { useEffect } from 'react'
+
+
+const categories = [
+  { value: 'development', label: 'Development' },
+  { value: 'design', label: 'Design' },
+  { value: 'sales', label: 'Sales' },
+  { value: 'marketing', label: 'Marketing' },
+]
+
 
 export default function Create() {
+  const { documents } = useCollection("users")
+  const [ users,setUsers ] = useState([])
+
   // form field values
   const [name, setName] = useState('')
   const [details, setDetails] = useState('')
   const [dueDate, setDueDate] = useState('')
   const [category, setCategory] = useState('')
   const [assignedUsers, setAssignedUsers] = useState([])
+  const [ formError, setFormError ] = useState(null)
+
+  useEffect(()=>{
+    if(documents){
+      const options = documents.map(user => {
+        return { value: user, label: user.displayName } 
+      })
+      setUsers(options)
+    }
+  },[documents])
 
   const handleSubmit = (e) => {
     e.preventDefault()
-    console.log(name,details,dueDate);
+    setFormError(null)
+
+    if(!category){
+      setFormError("please select a project category")
+      return
+    }
+
+    if(assignedUsers.length < 1){
+      setFormError("please assign the project to at least 1 user")
+      return
+    }
+
+    console.log(name,details,dueDate,category.value, assignedUsers);
   }
 
 
@@ -51,13 +88,23 @@ export default function Create() {
           </label>
           <label>
             <span>Project category:</span>
-            {/* category here */}
+            <Select
+            // selected option
+              onChange={(option) => setCategory(option)}
+              options={categories}
+            />
           </label>
           <label>
             <span>Assign To:</span>
-            {/* assign here */}
+            <Select
+            onChange={(option) => setAssignedUsers(option)}
+              options={users}
+              // we can select multiple users
+              isMulti
+            />
           </label>
           <button className="btn">Add project</button>
+          {formError && <p className='error'>{formError}</p> }
       </form>
     </div>
   )
