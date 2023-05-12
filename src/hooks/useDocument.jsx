@@ -11,9 +11,16 @@ export const useDocument = (collection, id) => {
 
         //get realitme updates, when someting changes in db it fires again
         const unsubscribe = ref.onSnapshot((snapshot)=>{
-            //get the data from snapshot
-            setDocument({...snapshot.data(), id: snapshot.id})
-            setError(null)
+            //check that id is exist
+            if(snapshot.data()){
+                //get the data from snapshot
+                setDocument({...snapshot.data(), id: snapshot.id})
+                setError(null)
+            }
+            else{
+                setError('no such document exists')
+            }
+            
         }, (err) => {
             console.log(err.message);
             setError("failed to get document")
